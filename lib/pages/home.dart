@@ -1,8 +1,10 @@
 import 'package:fitness/models/category_model.dart';
 import 'package:fitness/models/diet_model.dart';
 import 'package:fitness/models/popular_model.dart';
+import 'package:fitness/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,11 +17,36 @@ class _HomePageState extends State<HomePage> {
   List<CategoryModel> categories = [];
   List<DietModel> diets = [];
   List<PopularDietsModel> popularDiets = [];
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _getInitialInfo();
+  }
 
   void _getInitialInfo() {
     categories = CategoryModel.getCategories();
     diets = DietModel.getDiets();
     popularDiets = PopularDietsModel.getPopularDiets();
+  }
+
+  void _onItemTapped(int index) {
+    if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ProfilePage()),
+      );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   @override
@@ -31,11 +58,11 @@ class _HomePageState extends State<HomePage> {
       body: ListView(
         children: [
           _searchField(),
-          const SizedBox(height: 40),
+          SizedBox(height: 40),
           _categoriesSection(),
-          const SizedBox(height: 40),
+          SizedBox(height: 40),
           _dietSection(),
-          const SizedBox(height: 40),
+          SizedBox(height: 40),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -57,33 +84,15 @@ class _HomePageState extends State<HomePage> {
                 separatorBuilder: (context, index) => SizedBox(height: 25),
                 padding: EdgeInsets.only(left: 20, right: 20),
                 itemBuilder: (context, index) {
-                  return Container(
+                  var container = Container(
                     height: 100,
-                    decoration: BoxDecoration(
-                      color:
-                          popularDiets[index].boxIsSelected
-                              ? Colors.white
-                              : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow:
-                          popularDiets[index].boxIsSelected
-                              ? [
-                                BoxShadow(
-                                  color: Color(0xff1D1617).withOpacity(0.07),
-                                  offset: Offset(0, 10),
-                                  blurRadius: 40,
-                                  spreadRadius: 0,
-                                ),
-                              ]
-                              : [],
-                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         SvgPicture.asset(
                           popularDiets[index].iconPath,
-                          width: 65,
                           height: 65,
+                          width: 65,
                         ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -104,27 +113,65 @@ class _HomePageState extends State<HomePage> {
                                   ' | ' +
                                   popularDiets[index].calorie,
                               style: TextStyle(
-                                color: Color(0xff7B6F72),
+                                color: Color(0xff786F72),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],
                         ),
-                        GestureDetector(onTap: () {}),
-                        SvgPicture.asset(
-                          'assets/icons/button.svg',
-                          width: 30,
-                          height: 30,
+                        GestureDetector(
+                          onTap: () {},
+                          child: SvgPicture.asset(
+                            'assets/icons/button.svg',
+                            height: 30,
+                            width: 30,
+                          ),
                         ),
                       ],
                     ),
+                    decoration: BoxDecoration(
+                      color:
+                          popularDiets[index].boxIsSelected
+                              ? Colors.white
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow:
+                          popularDiets[index].boxIsSelected
+                              ? [
+                                BoxShadow(
+                                  color: Color(0xff1D1617).withOpacity(0.07),
+                                  offset: Offset(0, 10),
+                                  blurRadius: 40,
+                                  spreadRadius: 0,
+                                ),
+                              ]
+                              : [],
+                    ),
                   );
+                  return container;
                 },
               ),
             ],
           ),
           SizedBox(height: 40),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: const Color(0xff9DCEFF),
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
         ],
       ),
     );
@@ -160,29 +207,25 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SvgPicture.asset(diets[index].iconPath),
-                    Column(
-                      children: [
-                        Text(
-                          diets[index].name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          diets[index].level +
-                              ' | ' +
-                              diets[index].duration +
-                              ' | ' +
-                              diets[index].calorie,
-                          style: TextStyle(
-                            color: Color(0xff7B6F72),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      diets[index].name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      diets[index].level +
+                          ' | ' +
+                          diets[index].duration +
+                          ' | ' +
+                          diets[index].calorie,
+                      style: TextStyle(
+                        color: Color(0xff786F72),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                     Container(
                       height: 45,
@@ -195,8 +238,8 @@ class _HomePageState extends State<HomePage> {
                                 diets[index].viewIsSelected
                                     ? Colors.white
                                     : Color(0xffC58BF2),
-                            fontWeight: FontWeight.w600,
                             fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -207,7 +250,7 @@ class _HomePageState extends State<HomePage> {
                                 ? Color(0xff9DCEFF)
                                 : Colors.transparent,
                             diets[index].viewIsSelected
-                                ? Color(0xff92A3Fd)
+                                ? Color(0xff92A3FD)
                                 : Colors.transparent,
                           ],
                         ),
@@ -221,7 +264,6 @@ class _HomePageState extends State<HomePage> {
             separatorBuilder: (context, index) => SizedBox(width: 25),
             itemCount: diets.length,
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.only(left: 20, right: 20),
           ),
         ),
       ],
@@ -246,12 +288,10 @@ class _HomePageState extends State<HomePage> {
         SizedBox(height: 15),
         Container(
           height: 120,
-
-          color: Colors.white,
           child: ListView.separated(
             itemCount: categories.length,
-            scrollDirection: Axis.horizontal,
             padding: EdgeInsets.only(left: 20, right: 20),
+            scrollDirection: Axis.horizontal,
             separatorBuilder: (context, index) => SizedBox(width: 25),
             itemBuilder: (context, index) {
               return Container(
@@ -261,7 +301,7 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       width: 50,
@@ -278,9 +318,9 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       categories[index].name,
                       style: TextStyle(
-                        fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 14,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -358,28 +398,24 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
       elevation: 0.0,
       centerTitle: true,
-      leading: GestureDetector(
-        onTap: () {},
-        child: Container(
-          margin: EdgeInsets.all(10),
-          alignment: Alignment.center,
-          child: SvgPicture.asset(
-            'assets/icons/Arrow - left 2.svg',
-            height: 20,
-            width: 20,
-          ),
-          decoration: BoxDecoration(
-            color: Color(0xffF7F8F8),
-            borderRadius: BorderRadius.circular(10),
-          ),
+      leading: Container(
+        margin: const EdgeInsets.all(10),
+        alignment: Alignment.center,
+        child: SvgPicture.asset(
+          'assets/icons/Arrow - Left 2.svg',
+          height: 20,
+          width: 20,
+        ),
+        decoration: BoxDecoration(
+          color: Color(0xffF7F8F8),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
-
       actions: [
         GestureDetector(
           onTap: () {},
           child: Container(
-            margin: EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
             alignment: Alignment.center,
             width: 37,
             child: SvgPicture.asset(
